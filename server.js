@@ -1,40 +1,23 @@
 var express = require('express')
 var app = express()
-var moment = require('moment');
-var url = require('url');
-var port = process.env.PORT || 8080;
+var useragent = require('useragent')
+var port = process.env.PORT || 8080
 
-app.route('/').get(function (req, res) {
-	res.sendFile(process.cwd()+'/public/index.html');
-});
 
 app.get('/*', function(req, res) {
-    var requrl = url.parse(req.url).pathname;
-    var cleanreq = requrl.replace(/^\/|\/$|%20+/g, '');
-
-    if (moment(+cleanreq).isValid()|moment(cleanreq).isValid()){
-        
-        if (isNaN(cleanreq)) {
-            var unixtime = moment(cleanreq.toString(), "MMMM-DD-YYYY").unix()
-            var naturaltime = moment(cleanreq.toString(), "MMMM-DD-YYYY").format("MMMM D, YYYY")
-        }
-        else {
-            var unixtime = moment(cleanreq.toString(), "MMMM-DD-YYYY").unix()
-            var naturaltime = moment.unix(+cleanreq).format("MMMM D, YYYY")
-        }
-    }
-    else {
-        var unixtime = null
-        var naturaltime = null
-    }
+	var ipadd = req.ip.replace(/^.*:/, '')
+    var lang = req.headers["accept-language"].replace(/,.*/, '')
+    var agent = useragent.parse(req.headers['user-agent'])
+    var soft = agent.os.toString()
     
-    var jsonstring = {
-        unix : unixtime,
-        natural : naturaltime
+	var jsonstring = {
+        ipaddress : ipadd,
+        language : lang,
+        software: soft
     }
     res.send(JSON.stringify(jsonstring))
 });
 
 app.listen(port, function() {
-	console.log('Node.js listening on port 8080 ...')
+	console.log("server running")
 })
